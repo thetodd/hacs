@@ -68,7 +68,7 @@ class Isapi:
         response = await session.request("GET", f"{self._host}{url}")
         content = await response.content.read()
         await session.close()
-        _LOGGER.info(content)
+        _LOGGER.debug(content)
         return ET.fromstring(content)
 
     def _coalesce(self, text: ET.Element[str] | None, alternative: str) -> str:
@@ -81,6 +81,24 @@ class Isapi:
         )
 
         return user_check is not None and user_check.text == "OK"
+
+    async def trigger_door_output(self, output_id: str) -> ET.Element[str]:
+        # session = aiohttp.ClientSession(middlewares=(self._auth,))
+        # response = await session.request(
+        #    "PUT",
+        #    f"{self._host}/ISAPI/AccessControl/RemoteControl/door/{output_id}",
+        #    data="<RemoteControlDoor><cmd>open</cmd></RemoteControlDoor>",
+        # )
+        # content = await response.content.read()
+        # await session.close()
+        # _LOGGER.debug(content)
+        return ET.fromstring("""<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="1.0" xmlns="http://www.std-cgi.com/ver10/XMLSchema">
+    <requestURL></requestURL>
+    <statusCode>1</statusCode>
+    <statusString>OK</statusString>
+    <subStatusCode>ok</subStatusCode>
+</ResponseStatus>""")
 
     async def get_device_info(self) -> IsapiDeviceInfo:
         deviceCapabilities = await self._isapi_request("/ISAPI/System/deviceInfo")

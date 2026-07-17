@@ -1,0 +1,61 @@
+import logging
+import time
+from typing import TYPE_CHECKING
+
+from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+
+    from custom_components.isapi.isapi import IsapiDevice, IsapiIOChannel
+
+    from .isapi import IsapiConfigEntry
+
+_LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config: IsapiConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    """Set up the sensor platform."""
+    output_channels = await config.runtime_data.api.get_output_channels()
+
+    locks: list[IsapiLock] = [
+        IsapiLock(config.runtime_data, channel)
+        for channel in output_channels
+        if channel.iotype == "electricLock"
+    ]
+
+    async_add_entities(locks)
+
+
+class IsapiLock(SwitchEntity):
+    def __init__(self, device: IsapiDevice, channel: IsapiIOChannel) -> None:
+        super().__init__()
+        self.device = device
+        self.channel = channel
+        self.entity_description = SwitchEntityDescription(
+            key=f"isapi.lock.{channel.id}",
+            name=channel.name,
+        )
+        self.device_info = device.device_info
+        self._attr_unique_id = (
+            f"{device.device_info.get('serial_number')}_{self.entity_description.key}"
+        )
+        self.is_on = False
+
+    def turn_on(self) -> None:
+        """Unlock all or specified locks."""
+        _LOGGER.debug("Unlock %s", self.channel.id)
+        self.is_on = True
+        self.schedule_update_ha_state()
+        time.sleep(3)
+        # TODO: Add trigger call to door
+        self.is_on = False
+        self.schedule_update_ha_state()
+
+    def turn_off(self) -> None:
+        """Turn off lock."""

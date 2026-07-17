@@ -12,14 +12,12 @@ if TYPE_CHECKING:
     from .isapi import IsapiConfigEntry
 
 
-from homeassistant.const import EntityCategory
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
-    SensorStateClass,
 )
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import EntityCategory
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ from . import isapi
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
-PLATFORMS = [Platform.SENSOR, Platform.LOCK]
+PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
 
 type IsapiConfigEntry = ConfigEntry[isapi.IsapiDevice]
 
