@@ -1,0 +1,15 @@
+{
+  "domain": "isapi",
+  "name": "HikVision ISAPI Integration",
+  "codeowners": [
+    "@thetodd"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/thetodd/hacs",
+  "issue_tracker": "https://github.com/thetodd/hacs/issues",
+  "iot_class": "local_pull",
+  "requirements": [
+    "aiohttp==3.14.1"
+  ],
+  "version": "0.1.0"
+}

@@ -1,5 +1,8 @@
 {
-    "name": "Integration blueprint",
+    "name": "HikVision ISAPI Integration",
+    "zip_release": true,
+    "hide_default_branch": false,
     "homeassistant": "2026.3.2",
-    "hacs": "2.0.5"
+    "hacs": "2.0.5",
+    "filename": "hikvision_isapi.zip"
 }

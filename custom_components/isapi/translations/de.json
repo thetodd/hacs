@@ -1,0 +1,14 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Pick Hue bridge",
+                "data": {
+                    "network_address": "Netzwerkadresse",
+                    "username": "Benutzer",
+                    "password": "Passwort"
+                }
+            }
+        }
+    }
+}
