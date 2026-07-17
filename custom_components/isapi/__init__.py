@@ -19,11 +19,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: IsapiConfigEntry) -> boo
     """Set up Hello World from a config entry."""
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
-    # api = isapi.Isapi(
-    #    entry.data["host"], entry.data["username"], entry.data["password"]
-    # )
+    api = isapi.Isapi(
+        entry.data["host"], entry.data["username"], entry.data["password"]
+    )
 
-    entry.runtime_data = isapi.IsapiDevice(hass, entry)
+    device_info = await api.get_device_info()
+
+    entry.runtime_data = isapi.IsapiDevice(hass, entry, api, device_info)
 
     # This creates each HA object for each platform your device requires.
     # It's done by calling the `async_setup_entry` function in each platform module.
