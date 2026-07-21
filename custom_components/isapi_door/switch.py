@@ -6,11 +6,13 @@ from typing import TYPE_CHECKING
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 
+from custom_components.isapi_door.const import DOMAIN
+
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-    from custom_components.isapi.isapi import IsapiDevice, IsapiIOChannel
+    from custom_components.isapi_door.isapi import IsapiDevice, IsapiIOChannel
 
     from .isapi import IsapiConfigEntry
 
@@ -43,7 +45,7 @@ class IsapiLock(SwitchEntity):
         self.device = device
         self.channel = channel
         self.entity_description = SwitchEntityDescription(
-            key=f"isapi.lock.{channel.id}",
+            key=f"{DOMAIN}.lock.{channel.id}",
             name=channel.name,
         )
         self.device_info = device.device_info

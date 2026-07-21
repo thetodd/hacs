@@ -8,14 +8,14 @@ import aiohttp
 from defusedxml.ElementTree import fromstring
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
-from custom_components.isapi.const import DOMAIN
+from custom_components.isapi_door.const import DOMAIN
 
 if TYPE_CHECKING:
     from xml.etree.ElementTree import Element
 
     from homeassistant.core import HomeAssistant
 
-    from custom_components.isapi import IsapiConfigEntry
+    from custom_components.isapi_door import IsapiConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 

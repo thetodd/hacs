@@ -3,11 +3,13 @@
 import logging
 from typing import TYPE_CHECKING
 
+from custom_components.isapi_door.const import DOMAIN
+
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-    from custom_components.isapi.isapi import IsapiDevice, IsapiIOChannel
+    from custom_components.isapi_door.isapi import IsapiDevice, IsapiIOChannel
 
     from .isapi import IsapiConfigEntry
 
@@ -48,7 +50,7 @@ class InputChannelSensor(SensorEntity):
         super().__init__()
         self._channel = channel
         self.entity_description = SensorEntityDescription(
-            key=f"io.input.{channel.id}",
+            key=f"{DOMAIN}.io.input.{channel.id}",
             name=channel.name,
             device_class=SensorDeviceClass.ENUM,
             entity_category=EntityCategory.DIAGNOSTIC,
@@ -69,7 +71,7 @@ class OutputChannelSensor(SensorEntity):
         super().__init__()
         self._channel = channel
         self.entity_description = SensorEntityDescription(
-            key=f"io.output.{channel.id}",
+            key=f"{DOMAIN}.io.output.{channel.id}",
             name=channel.name,
             device_class=SensorDeviceClass.ENUM,
             entity_category=EntityCategory.DIAGNOSTIC,
