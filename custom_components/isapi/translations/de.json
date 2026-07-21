@@ -4,14 +4,24 @@
             "user": {
                 "title": "HikVision ISAPI Türintercom Gerät hinzufügen",
                 "data": {
-                    "network_address": "Host",
+                    "host": "Host",
+                    "password": "Passwort",
+                    "username": "Benutzername"
+                }
+            },
+            "reconfigure": {
+                "title": "HikVision ISAPI Türintercom Gerät neu konfigurieren",
+                "data": {
+                    "host": "Host",
                     "password": "Passwort",
                     "username": "Benutzername"
                 }
             }
         },
         "abort": {
-            "already_configured_device": "Das Gerät wurde bereits hinzugefügt"
+            "already_configured_device": "Das Gerät wurde bereits hinzugefügt.",
+            "cannot_connect": "Verbindung zum Gerät kann nicht aufgebaut werden.",
+            "unknown": "Ein unbekannter Fehler ist aufgetreten."
         }
     }
 }

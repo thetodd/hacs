@@ -69,7 +69,7 @@ class Isapi:
 
     async def _isapi_request(self, url: str) -> Element[str]:
         session = aiohttp.ClientSession(middlewares=(self._auth,))
-        response = await session.request("GET", f"{self._host}{url}")
+        response = await session.request("GET", f"http://{self._host}{url}")
         content = await response.content.read()
         await session.close()
         _LOGGER.debug(content)
@@ -91,7 +91,7 @@ class Isapi:
         # session = aiohttp.ClientSession(middlewares=(self._auth,))
         # response = await session.request(
         #    "PUT",
-        #    f"{self._host}/ISAPI/AccessControl/RemoteControl/door/{output_id}",
+        #    f"http://{self._host}/ISAPI/AccessControl/RemoteControl/door/{output_id}",
         #    data="<RemoteControlDoor><cmd>open</cmd></RemoteControlDoor>",
         # )
         # content = await response.content.read()
@@ -177,6 +177,7 @@ class IsapiDevice:
         self.device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, entry.data["device_id"])},
+            # via_device=entry.data["host"],
             manufacturer="HikVision",
             sw_version=device_info.device_firmware,
             model=device_info.device_model,
