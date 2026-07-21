@@ -1,4 +1,4 @@
-"""The Your Integration integration."""
+"""The ISAPI door intercom integration."""
 
 from typing import TYPE_CHECKING
 
@@ -16,9 +16,7 @@ type IsapiConfigEntry = ConfigEntry[isapi.IsapiDevice]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: IsapiConfigEntry) -> bool:
-    """Set up Hello World from a config entry."""
-    # Store an instance of the "connecting" class that does the work of speaking
-    # with your actual devices.
+    """Set up isapi door intercom from a config entry."""
     api = isapi.Isapi(
         entry.data["host"], entry.data["username"], entry.data["password"]
     )
@@ -27,8 +25,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: IsapiConfigEntry) -> boo
 
     entry.runtime_data = isapi.IsapiDevice(hass, entry, api, device_info)
 
-    # This creates each HA object for each platform your device requires.
-    # It's done by calling the `async_setup_entry` function in each platform module.
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 

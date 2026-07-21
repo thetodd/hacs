@@ -1,3 +1,5 @@
+"""Switch implementation for door opener."""
+
 import logging
 import time
 from typing import TYPE_CHECKING
@@ -16,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    _: HomeAssistant,
     config: IsapiConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
@@ -33,7 +35,10 @@ async def async_setup_entry(
 
 
 class IsapiLock(SwitchEntity):
+    """Represents a door opener."""
+
     def __init__(self, device: IsapiDevice, channel: IsapiIOChannel) -> None:
+        """Initialize door opener."""
         super().__init__()
         self.device = device
         self.channel = channel

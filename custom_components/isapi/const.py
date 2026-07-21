@@ -1,3 +1,3 @@
 """Constants for this integration."""
 
-DOMAIN = "isapi"
+DOMAIN = "isapi_door"

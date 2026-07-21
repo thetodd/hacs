@@ -23,7 +23,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    _: HomeAssistant,
     config: IsapiConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
@@ -44,6 +44,7 @@ class InputChannelSensor(SensorEntity):
     """Input channel."""
 
     def __init__(self, channel: IsapiIOChannel, device: IsapiDevice) -> None:
+        """Initialize input channel."""
         super().__init__()
         self._channel = channel
         self.entity_description = SensorEntityDescription(
@@ -64,6 +65,7 @@ class OutputChannelSensor(SensorEntity):
     """Output channel."""
 
     def __init__(self, channel: IsapiIOChannel, device: IsapiDevice) -> None:
+        """Initialize output channel."""
         super().__init__()
         self._channel = channel
         self.entity_description = SensorEntityDescription(

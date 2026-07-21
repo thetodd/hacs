@@ -1,4 +1,4 @@
-"""Example config flow."""
+"""Isapi door intercom config flow."""
 
 import logging
 from typing import TYPE_CHECKING, Any
@@ -15,12 +15,8 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-    """
-    Validate the user input allows us to connect.
-
-    Data has the keys from DATA_SCHEMA with values provided by the user.
-    """
+async def validate_input(_: HomeAssistant, data: dict[str, str]) -> dict[str, Any]:
+    """Validate the user input allows us to connect."""
     isapi = Isapi(data["network_address"], data["username"], data["password"])
     success = await isapi.test_connection()
 
@@ -41,17 +37,19 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     }
 
 
-class ExampleConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Example config flow."""
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow."""
 
-    async def async_step_user(self, user_input=None) -> config_entries.ConfigFlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, str] | None = None
+    ) -> config_entries.ConfigFlowResult:
         """Handle initial step."""
         errors = {}
         if user_input is not None:
             try:
                 info = await validate_input(self.hass, user_input)
 
-                await self.async_set_unique_id(f"isapi.{info['device_serial']}")
+                await self.async_set_unique_id(f"{DOMAIN}.{info['device_serial']}")
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title=info["device_name"], data=info)
             except CannotConnect:

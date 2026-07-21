@@ -1,17 +1,18 @@
-"""A ISAPI device."""
+"""ISAPI device classes."""
 
-import enum
 import logging
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, cast
 
 import aiohttp
+from defusedxml.ElementTree import fromstring
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
 from custom_components.isapi.const import DOMAIN
 
 if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element
+
     from homeassistant.core import HomeAssistant
 
     from custom_components.isapi import IsapiConfigEntry
@@ -21,6 +22,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class IsapiConfig:
+    """Configuration object for reallife isapi device."""
+
     host: str
     username: str
     password: str
@@ -29,16 +32,13 @@ class IsapiConfig:
 
 @dataclass
 class IsapiDeviceInfo:
+    """Device info from API."""
+
     device_name: str
     device_id: str
     device_model: str
     device_serial: str
     device_firmware: str
-
-
-@dataclass
-class IsapiSystemCapabilities:
-    capability: str
 
 
 type IsapiIoType = Literal[
@@ -48,13 +48,17 @@ type IsapiIoType = Literal[
 
 @dataclass
 class IsapiIOChannel:
+    """IO Channel."""
+
     id: str
     name: str
     iotype: IsapiIoType
 
 
 class Isapi:
-    """Class representing an isapi."""
+    """Class representing the isapi communication."""
+
+    ns = "{http://www.isapi.org/ver20/XMLSchema}"
 
     def __init__(self, host: str, username: str, password: str) -> None:
         """Initialize isapi requests."""
@@ -63,26 +67,27 @@ class Isapi:
         self._username = username
         self._password = password
 
-    async def _isapi_request(self, url: str) -> ET.Element[str]:
+    async def _isapi_request(self, url: str) -> Element[str]:
         session = aiohttp.ClientSession(middlewares=(self._auth,))
         response = await session.request("GET", f"{self._host}{url}")
         content = await response.content.read()
         await session.close()
         _LOGGER.debug(content)
-        return ET.fromstring(content)
+        return fromstring(content)
 
-    def _coalesce(self, text: ET.Element[str] | None, alternative: str) -> str:
+    def _coalesce(self, text: Element[str] | None, alternative: str) -> str:
         return (text.text if text is not None else alternative) or alternative
 
     async def test_connection(self) -> bool:
         """Test connectivity to the Dummy hub is OK."""
         user_check = (await self._isapi_request("/ISAPI/Security/userCheck")).find(
-            "{http://www.isapi.org/ver20/XMLSchema}statusString"
+            f"{self.ns}statusString"
         )
 
         return user_check is not None and user_check.text == "OK"
 
-    async def trigger_door_output(self, output_id: str) -> ET.Element[str]:
+    async def trigger_door_output(self, output_id: str) -> Element[str]:
+        """Request door opener relais to trigger."""
         # session = aiohttp.ClientSession(middlewares=(self._auth,))
         # response = await session.request(
         #    "PUT",
@@ -92,7 +97,7 @@ class Isapi:
         # content = await response.content.read()
         # await session.close()
         # _LOGGER.debug(content)
-        return ET.fromstring("""<?xml version="1.0" encoding="UTF-8"?>
+        return fromstring("""<?xml version="1.0" encoding="UTF-8"?>
 <ResponseStatus version="1.0" xmlns="http://www.std-cgi.com/ver10/XMLSchema">
     <requestURL></requestURL>
     <statusCode>1</statusCode>
@@ -101,22 +106,13 @@ class Isapi:
 </ResponseStatus>""")
 
     async def get_device_info(self) -> IsapiDeviceInfo:
-        deviceCapabilities = await self._isapi_request("/ISAPI/System/deviceInfo")
-        device_name = deviceCapabilities.find(
-            "{http://www.isapi.org/ver20/XMLSchema}deviceName"
-        )
-        device_id = deviceCapabilities.find(
-            "{http://www.isapi.org/ver20/XMLSchema}deviceID"
-        )
-        device_model = deviceCapabilities.find(
-            "{http://www.isapi.org/ver20/XMLSchema}model"
-        )
-        device_serial = deviceCapabilities.find(
-            "{http://www.isapi.org/ver20/XMLSchema}serialNumber"
-        )
-        device_firmware = deviceCapabilities.find(
-            "{http://www.isapi.org/ver20/XMLSchema}firmwareVersion"
-        )
+        """Request device information from real device."""
+        device_capabilities = await self._isapi_request("/ISAPI/System/deviceInfo")
+        device_name = device_capabilities.find(f"{self.ns}deviceName")
+        device_id = device_capabilities.find(f"{self.ns}deviceID")
+        device_model = device_capabilities.find(f"{self.ns}model")
+        device_serial = device_capabilities.find(f"{self.ns}serialNumber")
+        device_firmware = device_capabilities.find(f"{self.ns}firmwareVersion")
         return IsapiDeviceInfo(
             self._coalesce(device_name, ""),
             self._coalesce(device_id, ""),
@@ -125,25 +121,19 @@ class Isapi:
             self._coalesce(device_firmware, ""),
         )
 
-    async def get_system_capabilities(self) -> IsapiSystemCapabilities:
-        return IsapiSystemCapabilities("TODO")
-
     async def get_output_channels(self) -> list[IsapiIOChannel]:
+        """Get a list of available output channels."""
         output_ports = (await self._isapi_request("/ISAPI/System/IO/outputs")).findall(
-            "{http://www.isapi.org/ver20/XMLSchema}IOOutputPort"
+            f"{self.ns}IOOutputPort"
         )
         return [
             IsapiIOChannel(
-                id=self._coalesce(
-                    port.find("{http://www.isapi.org/ver20/XMLSchema}id"), ""
-                ),
-                name=self._coalesce(
-                    port.find("{http://www.isapi.org/ver20/XMLSchema}name"), ""
-                ),
+                id=self._coalesce(port.find(f"{self.ns}id"), ""),
+                name=self._coalesce(port.find(f"{self.ns}name"), ""),
                 iotype=cast(
                     "IsapiIoType",
                     self._coalesce(
-                        port.find("{http://www.isapi.org/ver20/XMLSchema}IOUseType"),
+                        port.find(f"{self.ns}IOUseType"),
                         "disable",
                     ),
                 ),
@@ -152,21 +142,18 @@ class Isapi:
         ]
 
     async def get_input_channels(self) -> list[IsapiIOChannel]:
+        """Get a list of available input channels."""
         input_ports = (await self._isapi_request("/ISAPI/System/IO/inputs")).findall(
-            "{http://www.isapi.org/ver20/XMLSchema}IOInputPort"
+            f"{self.ns}IOInputPort"
         )
         return [
             IsapiIOChannel(
-                id=self._coalesce(
-                    port.find("{http://www.isapi.org/ver20/XMLSchema}id"), ""
-                ),
-                name=self._coalesce(
-                    port.find("{http://www.isapi.org/ver20/XMLSchema}name"), ""
-                ),
+                id=self._coalesce(port.find(f"{self.ns}id"), ""),
+                name=self._coalesce(port.find(f"{self.ns}name"), ""),
                 iotype=cast(
                     "IsapiIoType",
                     self._coalesce(
-                        port.find("{http://www.isapi.org/ver20/XMLSchema}IOUseType"),
+                        port.find(f"{self.ns}IOUseType"),
                         "disable",
                     ),
                 ),
@@ -180,11 +167,12 @@ class IsapiDevice:
 
     def __init__(
         self,
-        hass: HomeAssistant,
+        _: HomeAssistant,
         entry: IsapiConfigEntry,
         api: Isapi,
         device_info: IsapiDeviceInfo,
     ) -> None:
+        """Initialize the device class."""
         self.api = api
         self.device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,

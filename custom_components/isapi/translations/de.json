@@ -2,11 +2,11 @@
     "config": {
         "step": {
             "user": {
-                "title": "HikVision ISAPI Gerät hinzufügen",
+                "title": "HikVision ISAPI Türintercom Gerät hinzufügen",
                 "data": {
                     "network_address": "Host",
-                    "username": "Benutzer",
-                    "password": "Passwort"
+                    "password": "Passwort",
+                    "username": "Benutzername"
                 }
             }
         },
