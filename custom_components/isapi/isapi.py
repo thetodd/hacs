@@ -88,22 +88,16 @@ class Isapi:
 
     async def trigger_door_output(self, output_id: str) -> Element[str]:
         """Request door opener relais to trigger."""
-        # session = aiohttp.ClientSession(middlewares=(self._auth,))
-        # response = await session.request(
-        #    "PUT",
-        #    f"http://{self._host}/ISAPI/AccessControl/RemoteControl/door/{output_id}",
-        #    data="<RemoteControlDoor><cmd>open</cmd></RemoteControlDoor>",
-        # )
-        # content = await response.content.read()
-        # await session.close()
-        # _LOGGER.debug(content)
-        return fromstring("""<?xml version="1.0" encoding="UTF-8"?>
-<ResponseStatus version="1.0" xmlns="http://www.std-cgi.com/ver10/XMLSchema">
-    <requestURL></requestURL>
-    <statusCode>1</statusCode>
-    <statusString>OK</statusString>
-    <subStatusCode>ok</subStatusCode>
-</ResponseStatus>""")
+        session = aiohttp.ClientSession(middlewares=(self._auth,))
+        response = await session.request(
+            "PUT",
+            f"http://{self._host}/ISAPI/AccessControl/RemoteControl/door/{output_id}",
+            data="<RemoteControlDoor><cmd>open</cmd></RemoteControlDoor>",
+        )
+        content = await response.content.read()
+        await session.close()
+        _LOGGER.debug(content)
+        return fromstring(content)
 
     async def get_device_info(self) -> IsapiDeviceInfo:
         """Request device information from real device."""
@@ -177,7 +171,6 @@ class IsapiDevice:
         self.device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, entry.data["device_id"])},
-            # via_device=entry.data["host"],
             manufacturer="HikVision",
             sw_version=device_info.device_firmware,
             model=device_info.device_model,
