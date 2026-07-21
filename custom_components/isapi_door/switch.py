@@ -59,8 +59,8 @@ class IsapiLock(SwitchEntity):
         _LOGGER.debug("Unlock %s", self.channel.id)
         self.is_on = True
         self.schedule_update_ha_state()
+        _ = self.device.api.trigger_door_output(self.channel.id)
         time.sleep(3)
-        # TODO: Add trigger call to door
         self.is_on = False
         self.schedule_update_ha_state()
 
