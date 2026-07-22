@@ -22,6 +22,6 @@ jobs:
           cd "${{ github.workspace }}/custom_components/isapi_door"
           zip hikvision_isapi_door.zip -r ./
       - name: Upload zip to release
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           files: ${{ github.workspace }}/custom_components/isapi_door/hikvision_isapi_door.zip
