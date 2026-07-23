@@ -1,5 +1,6 @@
 """Switch implementation for door opener."""
 
+import asyncio
 import logging
 import time
 from typing import TYPE_CHECKING
@@ -54,13 +55,13 @@ class IsapiLock(SwitchEntity):
         )
         self.is_on = False
 
-    def turn_on(self) -> None:
+    async def async_turn_on(self) -> None:
         """Unlock all or specified locks."""
         _LOGGER.debug("Unlock %s", self.channel.id)
         self.is_on = True
         self.schedule_update_ha_state()
-        _ = self.device.api.trigger_door_output(self.channel.id)
-        time.sleep(3)
+        _ = await self.device.api.trigger_door_output(self.channel.id)
+        await asyncio.sleep(3)
         self.is_on = False
         self.schedule_update_ha_state()
 
